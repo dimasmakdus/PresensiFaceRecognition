@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "head.html" %}
+
+</head>
+<body style="background-image: url('static/dist/img/photo2.png'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;">
+    {% include "navbar-home.html" %}
+ 
+<div class="container-fluid">
+    <div class="row p-3 mt-4">
+        <div class="col-md-6">
+            <img src="{{ url_for('video_presensi') }}" width="100%" class="img-thumbnail">
+            <!-- <img src="https://www.dmarge.com/wp-content/uploads/2021/01/dwayne-the-rock-.jpg" width="100%" class="img-thumbnail"> -->
+        </div>
+        <div class="col-md-6" style="height:500px; overflow-y:auto;">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Absensi Hari Ini</h3>
+                    <table id="absensiharian" class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                          <th>ID #</th>
+                          <th>Nama Pegawai</th>
+                          <th>Jabatan</th>
+                          <th>Jam</th>
+                        </tr>
+                        </thead>
+                        <tbody id="scandata"></tbody>
+                      </table>
+                </div>
+              </div>
+        </div>
+    </div>
+</div>
+
+{% include "script.html" %}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        let lastcnt = 0;
+        let cnt;
+        chkNewScan();
+ 
+        function chkNewScan() {
+            countTodayScan();
+            setTimeout(chkNewScan, 1000);
+        }
+
+        function countTodayScan() {
+            $.ajax({
+                url: '/countTodayScan',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    cnt = data.rowcount;
+                    if (cnt > lastcnt) {
+                        reloadTable();
+                    }
+ 
+                    lastcnt = cnt;
+                },
+                error: function(result){
+                    console.log('no result!')
+                }
+            })
+        }
+ 
+        function reloadTable() {
+            $.ajax({
+                url: '/loadData',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response){
+                    var tr = $("#scandata");
+                    tr.empty();
+ 
+                    $.each(response, function(index, item) {
+                        if (item.length > 0) {
+                            for (let i = 0; i < item.length; i++) {
+                                tr.append('<tr>'+
+                                                '<td>'+item[i][1]+'</td>'+
+                                                '<td>'+item[i][2]+'</td>'+
+                                                '<td>'+item[i][3]+'</td>'+
+                                                '<td>'+item[i][4]+'</td>'+
+                                           '</tr>');
+                            }
+                        }
+                    });
+                },
+                error: function(result){
+                    console.log('no result!')
+                }
+            });
+        }
+    });
+</script>
+<script>
+    $(function () {
+      $('#absensiharian').DataTable({
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": false,
+        "autoWidth": true,
+        "responsive": false,
+      });
+    });
+  </script>
+
+</body>
+</html>
