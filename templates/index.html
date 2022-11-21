@@ -4,14 +4,21 @@
     {% include "head.html" %}
 
 </head>
-<body style="background-image: url('static/dist/img/photo2.png'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;">
+<body style="background-image: url('static/dist/img/low-poly-wireframe.webp'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;">
     {% include "navbar-home.html" %}
  
 <div class="container-fluid">
-    <div class="row p-3 mt-4">
+    <div class="row p-3 mt-2">
         <div class="col-md-6">
-            <img src="{{ url_for('video_presensi') }}" width="100%" class="img-thumbnail">
-            <!-- <img src="https://www.dmarge.com/wp-content/uploads/2021/01/dwayne-the-rock-.jpg" width="100%" class="img-thumbnail"> -->
+            <div class="card">
+                {% if checkdata %}
+                    <img src="{{ url_for('video_presensi') }}" width="100%" class="img-thumbnail">
+                {% else %}
+                    <div class="p-3">
+                        <img src="{{ url_for('static', filename='dist/img/no_dataset.png') }}" width="100%" class="img-thumbnail">
+                    </div>
+                {% endif %}
+            </div>
         </div>
         <div class="col-md-6" style="height:500px; overflow-y:auto;">
             <div class="card">

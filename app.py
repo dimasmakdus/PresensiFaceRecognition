@@ -8,6 +8,7 @@ import time
 from datetime import date
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 cnt = 0
 pause_cnt = 0
@@ -36,7 +37,7 @@ def generate_dataset(nbr):
         # scaling factor=1.3
         # Minimum neighbor = 5
 
-        if faces is ():
+        if faces == ():
             return None
         for (x, y, w, h) in faces:
             cropped_face = img[y:y + h, x:x + w]
@@ -125,11 +126,12 @@ def face_recognition():  # generate frame by frame from camera
             s = mycursor.fetchone()
             s = '' + ''.join(s)
 
-            if confidence > 70:
+            # print(confidence)
+            if confidence >= 85 and confidence <= 90:
                 cv2.putText(img, s, (x, y - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
             else:
-                cv2.putText(img, "UNKNOWN", (x, y - 5),
+                cv2.putText(img, "TIDAK DIKENALI", (x, y - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 1, cv2.LINE_AA)
 
             coords = [x, y, w, h]
@@ -180,7 +182,8 @@ def presensi_recognition():  # generate frame by frame from camera
             id, pred = clf.predict(gray_image[y:y + h, x:x + w])
             confidence = int(100 * (1 - pred / 300))
 
-            if confidence > 70 and not justscanned:
+            # print(confidence)
+            if confidence >= 85 and confidence <= 90 and not justscanned:
                 global cnt
                 cnt += 1
 
@@ -201,16 +204,28 @@ def presensi_recognition():  # generate frame by frame from camera
                                  "  left join prs_mstr b on a.img_person = b.prs_nbr "
                                  " where img_id = " + str(id))
                 row = mycursor.fetchone()
-                pnbr = row[0]
-                pname = row[1]
-                pskill = row[2]
+
+                if row:
+                    pnbr = row[0]
+                    pname = row[1]
+                    pskill = row[2]
 
                 if int(cnt) == 30:
                     cnt = 0
 
                     mycursor.execute(
-                        "insert into accs_hist (accs_date, accs_prsn) values('"+str(date.today())+"', '" + pnbr + "')")
-                    mydb.commit()
+                        "select accs_date from accs_hist where accs_prsn = '" + str(pnbr) + "' and accs_date = '" + str(date.today()) + "'")
+
+                    data = mycursor.fetchone()
+                    checkdate = data if data else []
+
+                    if len(checkdate) > 0:
+                        print("SUDAH ABSEN HARI INI")
+                    else:
+                        mycursor.execute(
+                            "insert into accs_hist (accs_date, accs_prsn) values('"+str(date.today())+"', '" + pnbr + "')")
+                        mydb.commit()
+                        print("BELUM ABSEN HARI INI")
 
                     cv2.putText(img, pname + ' | ' + pskill, (x - 10, y - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (153, 255, 255), 2, cv2.LINE_AA)
@@ -221,7 +236,7 @@ def presensi_recognition():  # generate frame by frame from camera
 
             else:
                 if not justscanned:
-                    cv2.putText(img, 'UNKNOWN', (x, y - 5),
+                    cv2.putText(img, 'TIDAK DIKENALI', (x, y - 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
                 else:
                     cv2.putText(
@@ -261,6 +276,22 @@ def presensi_recognition():  # generate frame by frame from camera
             break
 
 
+def checkdataset():
+    mycursor.execute(
+        "select * from prs_mstr")
+    person = mycursor.fetchall()
+
+    mycursor.execute(
+        "select * from img_dataset")
+    imgdata = mycursor.fetchall()
+
+    checkdata = False
+    if len(person) > 0 or len(imgdata) > 0:
+        checkdata = True
+
+    return checkdata
+
+
 @app.route('/')
 def home():
     #  """Video streaming home page."""
@@ -271,36 +302,32 @@ def home():
                      " order by 1 desc")
     data = mycursor.fetchall()
 
-    return render_template('index.html', data=data)
+    return render_template('index.html', data=data, checkdata=checkdataset())
 
 
 @app.route('/datapegawai')
 def datapegawai():
-    mycursor.execute(
-        "select prs_nbr, prs_name, prs_skill, prs_active, prs_added from prs_mstr")
-    data = mycursor.fetchall()
+    if session.get('user'):
+        mycursor.execute(
+            "select prs_nbr, prs_name, prs_skill, prs_active, prs_added from prs_mstr")
+        data = mycursor.fetchall()
 
-    return render_template('datapegawai.html', data=data)
-
-
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-
-@app.route('/logout')
-def logout():
-    return render_template('index.html')
+        return render_template('datapegawai.html', data=data)
+    else:
+        return redirect("/login")
 
 
 @app.route('/addprsn')
 def addprsn():
-    mycursor.execute("select ifnull(max(prs_nbr) + 1, 101) from prs_mstr")
-    row = mycursor.fetchone()
-    nbr = row[0]
-    # print(int(nbr))
+    if session.get('user'):
+        mycursor.execute("select ifnull(max(prs_nbr) + 1, 101) from prs_mstr")
+        row = mycursor.fetchone()
+        nbr = row[0]
+        # print(int(nbr))
 
-    return render_template('addprsn.html', newnbr=int(nbr))
+        return render_template('addprsn.html', newnbr=int(nbr))
+    else:
+        return redirect("/login")
 
 
 @app.route('/addprsn_submit', methods=['POST'])
@@ -344,7 +371,10 @@ def video_presensi():
 
 @app.route('/fr_page')
 def fr_page():
-    return render_template('fr_page.html')
+    if session.get('user'):
+        return render_template('fr_page.html', checkdata=checkdataset())
+    else:
+        return redirect("/login")
 
 
 @app.route('/countTodayScan')
@@ -368,6 +398,47 @@ def loadData():
     data = mycursor.fetchall()
 
     return jsonify(response=data)
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route("/authentication", methods=["POST"])
+def authentication():
+    try:
+        username = request.form.get('username')
+        password = request.form.get('password')
+        mycursor.execute(
+            "select * from users where username = '"+str(username)+"'")
+
+        user = mycursor.fetchone()
+        data = user if user else []
+
+        print(data[6])
+        if len(data) > 0:
+            if str(data[2]) == str(password):
+                session['user'] = data[0]
+                session['full_name'] = data[6]
+                return redirect('/datapegawai')
+
+            else:
+                return render_template('login.html', error='username dan password salah...!')
+        else:
+            return render_template('login.html', error='username dan password salah...!')
+
+    except Exception as error:
+        return jsonify({
+            'status': 'error',
+            'message': str(error)
+        })
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/login')
 
 
 if __name__ == "__main__":

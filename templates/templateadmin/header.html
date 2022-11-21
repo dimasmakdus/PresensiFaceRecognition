@@ -47,7 +47,7 @@
       <li class="nav-item dropdown user-menu">
         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
           <img src="{{ url_for('static', filename='dist/img/avatar4.png') }}" class="user-image img-circle elevation-2" alt="User Image">
-          <span class="d-none d-md-inline">Administrator</span>
+          <span class="d-none d-md-inline">{{session['full_name']}}</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <!-- User image -->
@@ -55,7 +55,7 @@
             <img src="{{ url_for('static', filename='dist/img/avatar4.png') }}" class="img-circle elevation-2" alt="User Image">
 
             <p>
-              Administrator
+              {{session['full_name']}}
               <small>Member since Nov. 2012</small>
             </p>
           </li>
@@ -97,7 +97,7 @@
           <img src="{{ url_for('static', filename='dist/img/avatar4.png') }}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Administrator</a>
+          <a href="#" class="d-block">{{session['full_name']}}</a>
         </div>
       </div>
 

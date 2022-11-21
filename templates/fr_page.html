@@ -26,14 +26,20 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Test Face Recognition</h3>
+                <h3 class="card-title">Tes Scan Wajah</h3>
               </div>
               <!-- /.card-header -->
               <form class="form" method="post" action="/addprsn_submit">
               <div class="card-body">
                 <div class="row">
                     <div class="col-md-7 offset-lg-2">
-                        <img src="{{ url_for('video_feed') }}" width="100%" class="img-thumbnail">
+                      {% if checkdata %}
+                      <img src="{{ url_for('video_feed') }}" width="100%" class="img-thumbnail">
+                      {% else %}
+                          <div class="p-3">
+                              <img src="{{ url_for('static', filename='dist/img/no_dataset.png') }}" width="100%" class="img-thumbnail">
+                          </div>
+                      {% endif %}
                     </div>
                 </div>
 </div>
