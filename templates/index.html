@@ -5,6 +5,12 @@
 
 </head>
 <body style="background-image: url('static/dist/img/low-poly-wireframe.webp'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;">
+
+<!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <lottie-player src="{{ url_for('static', filename='dist/lottie/90963-face-recognition-face-scan-by-ai.json') }}" background="transparent"  speed="1"  style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+    <span>Membuka presensi wajah...</span>
+  </div>
     {% include "navbar-home.html" %}
  
 <div class="container-fluid">
@@ -12,7 +18,7 @@
         <div class="col-md-6">
             <div class="card">
                 {% if checkdata %}
-                    <img src="{{ url_for('video_presensi') }}" width="100%" class="img-thumbnail">
+                    <img src="/video_presensi" width="100%" class="rounded">
                 {% else %}
                     <div class="p-3">
                         <img src="{{ url_for('static', filename='dist/img/no_dataset.png') }}" width="100%" class="img-thumbnail">
@@ -20,21 +26,19 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-6" style="height:500px; overflow-y:auto;">
+        <div class="col-md-6">
             <div class="card">
-                <div class="card-body">
-                    <h3>Absensi Hari Ini</h3>
-                    <table id="absensiharian" class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                          <th>ID #</th>
-                          <th>Nama Pegawai</th>
-                          <th>Jabatan</th>
-                          <th>Jam</th>
-                        </tr>
-                        </thead>
-                        <tbody id="scandata"></tbody>
-                      </table>
+                <div class="card-header text-center py-2 bg-info">
+                        <h4 style="margin: 0" class="mt-2" id="date-part"></h4>
+                        <b><h1 id="time-part"></h1></b>
+                      </div>
+                <div class="card-body bg-dark text-center">
+                    
+                    <h5><span class="badge badge-pill badge-primary p-3 mb-3">PENGENALAN WAJAH</span></h5>
+                    <div id="resultScan">
+                        <lottie-player src="{{ url_for('static', filename='dist/lottie/90963-face-recognition-face-scan-by-ai.json') }}" background="transparent" speed="1" style="width: 200px; height: 200px; margin: 0 auto;" loop autoplay></lottie-player>
+                        <h4 class="text-white mt-3">. . . Deteksi Wajah . . .</h4> 
+                    </div>
                 </div>
               </div>
         </div>
@@ -50,8 +54,9 @@
         chkNewScan();
  
         function chkNewScan() {
-            countTodayScan();
-            setTimeout(chkNewScan, 1000);
+            // countTodayScan();
+            reloadTable()
+            setTimeout(chkNewScan, 3000);
         }
 
         function countTodayScan() {
@@ -78,22 +83,23 @@
                 url: '/loadData',
                 type: 'GET',
                 dataType: 'json',
-                success: function(response){
-                    var tr = $("#scandata");
-                    tr.empty();
- 
-                    $.each(response, function(index, item) {
-                        if (item.length > 0) {
-                            for (let i = 0; i < item.length; i++) {
-                                tr.append('<tr>'+
-                                                '<td>'+item[i][1]+'</td>'+
-                                                '<td>'+item[i][2]+'</td>'+
-                                                '<td>'+item[i][3]+'</td>'+
-                                                '<td>'+item[i][4]+'</td>'+
-                                           '</tr>');
-                            }
-                        }
-                    });
+                success: function(res){
+                    const response = res.response
+                    const data = response.data
+                    const msg = response.msg
+                    const status = response.status
+
+                    var div = $("#resultScan");
+                        
+                    div.html(`<lottie-player src="{{ url_for('static', filename='dist/lottie/90963-face-recognition-face-scan-by-ai.json') }}" background="transparent" speed="1" style="width: 200px; height: 200px; margin: 0 auto;" loop autoplay></lottie-player>
+                        <h4 class="text-white mt-3">. . . Deteksi Wajah . . .</h4>`)
+
+                    if (status == 1 || status == 2) {
+                        div.html(`<img src="/getDatasetImg/${data.pegawai_id}.1.jpg" width="30%" class="img-thumbnail">
+                        <h4 class="text-white mt-3">${data.pegawai_name}</h4>
+                        <h4 class="text-white">${data.jabatan_name}</h4>
+                        <h4 class="${status == 2 ? 'text-success' : 'text-danger'} mt-3">${msg}</h4>`)
+                    } 
                 },
                 error: function(result){
                     console.log('no result!')
@@ -102,6 +108,17 @@
         }
     });
 </script>
+
+<script>
+    $(document).ready(function() {
+    var interval = setInterval(function() {
+        var momentNow = moment();
+        $('#date-part').html(momentNow.format('DD-MM-YYYY'));
+        $('#time-part').html(momentNow.format('HH:mm:ss'));
+    }, 100);
+});
+</script>
+
 <script>
     $(function () {
       $('#absensiharian').DataTable({

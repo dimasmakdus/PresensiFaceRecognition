@@ -1,0 +1,254 @@
+{% include "templateadmin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Data Pegawai</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Data Pegawai</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Data Pegawai</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% if session['alert'] %}
+                <div class="alert {{ 'alert-success' if session['alert'][0] == 'success' else 'alert-danger'}} alert-dismissible">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                  <i class="icon fas fa-ban"></i>
+                  {{session['alert'][1]}}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <a data-toggle="modal" data-target="#tambah-pegawai" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Pegawai</a>
+                    <a href="/" class="btn btn-secondary"><i class="fas fa-barcode"></i> Absensi</a>
+                    <a href="/fr_page" class="btn btn-info"><i class="fas fa-camera"></i> Tes Scan Wajah</a>
+                </div>
+                <table id="datapegawai" class="table table-bordered table-hover">
+                  <thead>
+					          <tr>
+                        <th class="text-center">Data Wajah</th>
+                        <th>ID</th>
+                        <th>Nama Pegawai</th>
+                        <th>Jabatan</th>
+                        <th>Status Pegawai</th>
+                        <th>Tanggal Masuk</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in data %}
+                      <tr>
+                          <td class="text-center">
+                            <a href="/vfdataset_page/{{item[0]}}" class="btn btn-xs bg-purple btn-delete-pegawai"><i class="fas fa-plus"></i> Buat/Ganti Data Wajah </a>
+                            <br>
+                            {% if item[5] == 1 %}
+                            <span class="text-sm"><i class="fas fa-check-circle text-success"></i> Terdaftar</span>
+                            {% else %}
+                            <span class="text-sm"><i class="fas fa-times-circle text-danger"></i> Belum Terdaftar</span>
+                            {% endif %}
+                          </td>
+                          <td>{{item[0]}}</td>
+                          <td>{{item[1]}}</td>
+                          <td>{{item[2]}}</td>
+                          <td>{{item[3]}}</td>
+                          <td>{{item[4]}}</td>
+                          <td class="text-center">
+                            <span data-toggle="tooltip" data-placement="top" title="Ubah">
+                                <a class="btn btn-sm btn-primary btn-edit-pegawai" data-toggle="modal" data-target="#edit-{{item[0]}}"><i class="fas fa-edit"></i></a>
+                            </span>
+                            <span data-toggle="tooltip" data-placement="top" title="Hapus">
+                                <a class="btn btn-sm btn-danger btn-delete-pegawai" data-toggle="modal" data-target="#hapus-{{item[0]}}"><i class="fas fa-trash-alt"></i></a>
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Modal Hapus  -->
+                    <div class="modal fade" id="hapus-{{item[0]}}">
+                      <div class="modal-dialog">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h4 class="modal-title">Konfirmasi Hapus</h4>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                  <p>Apakah anda yakin ingin manghapus data ini?</p>
+                              </div>
+                              <div class="modal-footer">
+                                  <a href="/delete_pegawai/{{item[0]}}" class="btn btn-danger">Hapus</a>
+                                  <a class="btn btn-default" data-dismiss="modal">Tidak</a>
+                              </div>
+                          </div>
+                          <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
+                    <!-- Modal Edit -->
+                    <div class="modal fade" id="edit-{{item[0]}}">
+                      <div class="modal-dialog modal-lg">
+                          <div class="modal-content">
+                              <form class="form-horizontal" action="/updateprsn_submit" method="POST">
+                                  <div class="modal-header">
+                                      <h4 class="modal-title">Ubah Data Pegawai</h4>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body p-4">
+                                      <div class="form-group row">
+                                          <label for="kode-barang" class="col-sm-3 col-form-label">ID <span class="text-danger">*</span></label>
+                                          <div class="col-sm-9">
+                                              <input type="text" class="form-control" value="{{item[0]}}" required disabled>
+                                              <input type="hidden" name="pegawai_id" value="{{item[0]}}">
+                                          </div>
+                                      </div>
+                                      <div class="form-group row">
+                                          <label for="nama-barang" class="col-sm-3 col-form-label">Nama Pegawai <span class="text-danger">*</span></label>
+                                          <div class="col-sm-9">
+                                              <input type="text" class="form-control" name="nama_pegawai" value="{{item[1]}}" placeholder="Nama Pegawai" required>
+                                          </div>
+                                      </div>
+                                      <div class="form-group row">
+                                          <label for="jenis-satuan" class="col-sm-3 col-form-label">Jabatan <span class="text-danger">*</span></label>
+                                          <div class="col-sm-9">
+                                              <select class="form-control select2" name="jabatan_id" style="width: 100%;" required>
+                                                  <option value="" disabled>-- Pilih Jabatan --</option>
+                                                  {% for jabatan in jabatanList %}
+                                                      <option value="{{jabatan[0]}}" {{ 'selected' if jabatan[0] == item[6] else '' }}>{{jabatan[1]}}</option>
+                                                  {% endfor %}
+                                              </select>
+                                          </div>
+                                      </div>
+                                      <div class="form-group row">
+                                        <label for="jenis-satuan" class="col-sm-3 col-form-label">Status Pegawai <span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control select2" name="status_pegawai" style="width: 100%;" required>
+                                                <option value="" disabled>-- Pilih Status --</option>
+                                                {% for status in statusPegawai %}
+                                                    <option value="{{status[0]}}" {{ 'selected' if status[1] == item[3] else '' }}>{{status[1]}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                                      <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                                  </div>
+                              </form>
+                          </div>
+                          <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+
+      <!-- Modal Tambah Data -->
+      <div class="modal fade" id="tambah-pegawai">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form class="form-horizontal" action="/addprsn_submit" method="POST">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tambah Data Pegawai</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="form-group row">
+                            <label for="kode-barang" class="col-sm-3 col-form-label">ID <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="txtnbr" name="txtnbr" value="{{ newnbr }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="nama-barang" class="col-sm-3 col-form-label">Nama Pegawai <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="txtname" name="txtname" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="jenis-satuan" class="col-sm-3 col-form-label">Jabatan <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <select class="form-control select2" name="optskill" id="optskill">
+                                <option selected disabled>-- Pilih Jabatan --</option>
+                                {% for jabatan in jabatanList %}
+                                <option value="{{jabatan[0]}}">{{jabatan[1]}}</option>
+                                {% endfor %}
+                            </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="jenis-satuan" class="col-sm-3 col-form-label">Status Pegawai <span class="text-danger">*</span></label>
+                          <div class="col-sm-9">
+                              <select class="form-control select2" name="status_pegawai" style="width: 100%;" required>
+                                  <option value="" disabled selected>-- Pilih Status --</option>
+                                  {% for status in statusPegawai %}
+                                      <option value="{{status[0]}}">{{status[1]}}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                        <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                    </div>
+                </form>
+            </div>
+        <!-- /.modal-content -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% include "templateadmin/footer.html" %}
+
+<script>
+  $(function () {
+    $('#datapegawai').DataTable({
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": false,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+  });
+</script>
+</body>
+</html>

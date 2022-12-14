@@ -1,0 +1,236 @@
+{% include "templateadmin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Data Pengguna</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Data Pengguna</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Data Pengguna</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="mb-3">
+                  <a data-toggle="modal" data-target="#tambah-pengguna" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Pengguna</a>
+                </div>
+                <table id="datapengguna" class="table table-bordered table-hover">
+                  <thead>
+					          <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Hak Akses</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{loop.index}}</td>
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}}</td>
+                        <td>{{item[3]}}</td>
+                        <td>{{ 'Aktif' if item[5] == 1 else 'Tidak Aktif'}}</td>
+                        <td class="text-center">
+                          <span data-toggle="tooltip" data-placement="top" title="Ubah">
+                              <a class="btn btn-sm btn-primary btn-edit-pegawai" data-toggle="modal" data-target="#edit-{{item[0]}}"><i class="fas fa-edit"></i></a>
+                          </span>
+                          <span data-toggle="tooltip" data-placement="top" title="Hapus">
+                              <a class="btn btn-sm btn-danger btn-delete-pegawai" data-toggle="modal" data-target="#hapus-{{item[0]}}"><i class="fas fa-trash-alt"></i></a>
+                          </span>
+                      </td>
+                    </tr>
+
+                    <!-- Modal Hapus  -->
+                    <div class="modal fade" id="hapus-{{item[0]}}">
+                      <div class="modal-dialog">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h4 class="modal-title">Konfirmasi Hapus</h4>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                  <p>Apakah anda yakin ingin manghapus data ini?</p>
+                              </div>
+                              <div class="modal-footer">
+                                  <a href="/delete_user/{{item[0]}}" class="btn btn-danger">Hapus</a>
+                                  <a class="btn btn-default" data-dismiss="modal">Tidak</a>
+                              </div>
+                          </div>
+                          <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
+                    <!-- Modal Edit -->
+                    <div class="modal fade" id="edit-{{item[0]}}">
+                      <div class="modal-dialog modal-lg">
+                          <div class="modal-content">
+                              <form class="form-horizontal" action="/user_update_submit" method="POST">
+                                  <div class="modal-header">
+                                      <h4 class="modal-title">Ubah Data Pegawai</h4>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body p-4">
+                                      <input type="hidden" name="user_id" value="{{item[0]}}">
+                                      <div class="form-group row">
+                                        <label for="nama-barang" class="col-sm-3 col-form-label">Username <span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                          <input type="text" class="form-control" id="username" name="username" value="{{item[1]}}" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="nama-barang" class="col-sm-3 col-form-label">Nama <span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                          <input type="text" class="form-control" id="full_name" name="full_name" value="{{item[2]}}" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                      <label for="jenis-satuan" class="col-sm-3 col-form-label">Hak Akses <span class="text-danger">*</span></label>
+                                      <div class="col-sm-9">
+                                          <select class="form-control select2" name="id_user_role" style="width: 100%;" required>
+                                              <option value="" disabled>-- Pilih Hak Akses --</option>
+                                              {% for access in accessList %}
+                                                  <option value="{{access[0]}}" {{ 'selected' if access[0] == item[4] else '' }}>{{access[1]}}</option>
+                                              {% endfor %}
+                                          </select>
+                                      </div>
+                                    </div>
+                                    <div class="form-group row">
+                                      <label for="jenis-satuan" class="col-sm-3 col-form-label">Status <span class="text-danger">*</span></label>
+                                      <div class="col-sm-9">
+                                          <select class="form-control select2" name="status" style="width: 100%;" required>
+                                              <option value="" disabled>-- Pilih Status --</option>
+                                              {% for status in statusUser %}
+                                                  <option value="{{status[0]}}" {{ 'selected' if item[5] == status[0] else '' }}>{{status[1]}}</option>
+                                              {% endfor %}
+                                          </select>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                                      <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                                  </div>
+                              </form>
+                          </div>
+                          <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+
+      <!-- Modal Tambah Data -->
+      <div class="modal fade" id="tambah-pengguna">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form class="form-horizontal" action="/user_submit" method="POST">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tambah Data Pengguna</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="form-group row">
+                            <label for="nama-barang" class="col-sm-3 col-form-label">Username <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="nama-barang" class="col-sm-3 col-form-label">Nama <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="full_name" name="full_name" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="jenis-satuan" class="col-sm-3 col-form-label">Hak Akses <span class="text-danger">*</span></label>
+                          <div class="col-sm-9">
+                              <select class="form-control select2" name="id_user_role" style="width: 100%;" required>
+                                  <option value="" selected disabled>-- Pilih Hak Akses --</option>
+                                  {% for access in accessList %}
+                                      <option value="{{access[0]}}">{{access[1]}}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="jenis-satuan" class="col-sm-3 col-form-label">Status <span class="text-danger">*</span></label>
+                          <div class="col-sm-9">
+                              <select class="form-control select2" name="status" style="width: 100%;" required>
+                                  <option value="" selected disabled>-- Pilih Status --</option>
+                                  {% for status in statusUser %}
+                                      <option value="{{status[0]}}">{{status[1]}}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                        <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% include "templateadmin/footer.html" %}
+
+<script>
+  $(function () {
+    $('#datapengguna').DataTable({
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": false,
+      "info": true,
+      "autoWidth": true,
+      "responsive": true,
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "head.html" %}
+</head>
+<body>
+
+
+
+<section>
+    <div class="container-fluid">
+        <div class="row p-3 mt-5">
+            <div class="col-md-3 offset-lg-4 text-center">
+                <h3>Mendaftarkan Wajah {{ pegawai[1] }}</h3>
+                <hr>
+                <img src="{{ url_for('vidfeed_dataset', nbr=prs) }}" width="100%" class="img-thumbnail">
+                <!-- <img src="{{ url_for('static', filename='dist/img/user7-128x128.jpg') }}" width="100%" class="img-thumbnail"> -->
+                <div class="text-center mt-3" id="guideFace"></div>
+            </div>
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col-md-3 offset-lg-5" id="btnTraining"></div>
+        </div>
+    </div>
+</section>
+
+{% include "script.html" %}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        let lastcnt = 0;
+        let cnt;
+        let framecount = 0
+        chkNewScan();
+ 
+        function chkNewScan() {
+            reloadFrame()
+            setTimeout(chkNewScan, 500);
+        }
+ 
+        function reloadFrame() {
+            $.ajax({
+                url: '/countImgFrameScan',
+                type: 'GET',
+                dataType: 'json',
+                success: function(res){
+                    framecount = res.framecount
+                    console.log(framecount)
+                    let div = $("#guideFace");
+                    div.html('')
+                    if (framecount > 0 && framecount <= 20) {
+                        div.html(`<h5>Posisikan Muka Tampak: <span class="badge badge-danger p-2">Depan</span></h5>`)
+                    } else if (framecount >= 21 && framecount <= 40) {
+                        div.html(`<h5>Posisikan Muka Tampak: <span class="badge badge-danger p-2">Atas</span></h5>`)
+                    } else if (framecount >= 41 && framecount <= 60) {
+                        div.html(`<h5>Posisikan Muka Tampak: <span class="badge badge-danger p-2">Bawah</span></h5>`)
+                    } else if (framecount >= 61 && framecount <= 80) {
+                        div.html(`<h5>Posisikan Muka Tampak: <span class="badge badge-danger p-2">Kanan</span></h5>`)
+                    } else if (framecount >= 81 && framecount <= 99) {
+                        div.html(`<h5>Posisikan Muka Tampak: <span class="badge badge-danger p-2">Kiri</span></h5>`)
+                    } 
+
+                    if (framecount == 100) {
+                        div.html(`<span class="badge badge-success py-2 px-2"><h5>Selesai</h5></span>`)
+                        $('#btnTraining').html(`<a class="btn btn-warning btn-lg" href="{{ url_for('train_classifier', nbr=prs) }}"> Training </a>`)
+                    } 
+                },
+                error: function(result){
+                    console.log('no result!')
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
