@@ -440,19 +440,24 @@ def vfdataset_page(prs):
         "select * from pegawai where pegawai_id = "+str(prs)+" limit 1")
     pegawai = mycursor.fetchone()
 
-    # Hapus db img_dataset
     mycursor.execute(
-        "DELETE FROM img_dataset WHERE img_person = "+str(prs))
+        "select * from img_dataset where img_person = "+str(prs)+" limit 1")
+    checkDataset = mycursor.fetchone()
 
-    # Hapus file dataset per ID pegawai
-    datasetFile = [os.path.join(datasetPath, f)
-                   for f in os.listdir(datasetPath)]
-    for image in datasetFile:
-        id = int(os.path.split(image)[1].split(".")[0])
-        if (id == int(prs)):
-            os.remove(image)
+    if len(checkDataset) > 0:
+        # Hapus db img_dataset
+        mycursor.execute(
+            "DELETE FROM img_dataset WHERE img_person = "+str(prs))
 
-    mydb.commit()
+        # Hapus file dataset per ID pegawai
+        datasetFile = [os.path.join(datasetPath, f)
+                       for f in os.listdir(datasetPath)]
+        for image in datasetFile:
+            id = int(os.path.split(image)[1].split(".")[0])
+            if (id == int(prs)):
+                os.remove(image)
+
+        mydb.commit()
 
     return render_template('pages/master/datapegawai/gendataset.html', prs=prs, pegawai=pegawai)
 
