@@ -1,0 +1,176 @@
+{% include "templateadmin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Absensi Pegawai</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Absensi Pegawai</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Cari Absensi</h3>
+              </div>
+              <div class="card-body">
+                  <form method="GET">
+                      <div class="form-group">
+                          <div class="row">
+                              <div class="col-lg-3">
+                                <label>Pegawai</label>
+                                  <div class="input-group">
+                                    <select class="form-control select2" name="absensi_pegawai" id="absensi_pegawai" required>
+                                      <option value="" selected disabled>-- Pilih Pegawai --</option>
+                                      {% for pegawai in pegawaiList %}
+                                      <option value="{{pegawai[0]}}" {{ 'selected' if absensi_pegawai == pegawai[0] else '' }}>{{pegawai[1]}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                              </div>
+                              <div class="col-lg-3">
+                                <label>Bulan</label>
+                                  <div class="input-group">
+                                    <select class="form-control select2" name="absensi_bulan" id="absensi_bulan" required>
+                                      <option value="" selected disabled>-- Pilih Bulan --</option>
+                                      {% for bulan in bulanList %}
+                                      <option value="{{bulan[0]}}" {{ 'selected' if absensi_bulan == bulan[0] else '' }}>{{bulan[1]}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                              </div>
+                              <div class="col-lg-3">
+                                <label>Tahun</label>
+                                  <div class="input-group">
+                                    <select class="form-control select2" name="absensi_tahun" id="absensi_tahun" required>
+                                      <option value="" selected disabled>-- Pilih Tahun --</option>
+                                      {% for tahun in tahunList %}
+                                      <option value="{{tahun[0]}}" {{ 'selected' if absensi_tahun == tahun[0] else '' }}>{{tahun[0]}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                              </div>
+                              <div class="col-lg-2">
+                                <label></label>
+                                <div class="input-group mt-2">
+                                    <button type="submit" class="btn btn-primary col-md-12" name="report">Tampilkan Absensi</button>
+                                </div>
+                              </div>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+            </div>
+            
+            {% if isFilter == True %}
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Absensi Pegawai</h3>
+                <span class="float-right">
+                  <a href="{{ '/laporan_absensi_admin?absensi_pegawai='+absensi_pegawai+'&absensi_bulan='+absensi_bulan+'&absensi_tahun='+absensi_tahun+'&report='}}" target="_blank" class="btn btn-secondary"><i class="fas fa-print mr-2"></i> Cetak Laporan</a>
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <label class="col-md-2">Nama Pegawai</label>
+                  <strong>:</strong>
+                  <label class="col">{{pegawai_detail[0]}}</label>
+                </div>
+                <div class="row">
+                  <label class="col-md-2">Jabatan</label>
+                  <strong>:</strong>
+                  <label class="col">{{pegawai_detail[1]}}</label>
+                </div>
+                <div class="row">
+                  <label class="col-md-2">Jumlah Masuk</label>
+                  <strong>:</strong>
+                  <label class="col">{{jml_absen_masuk}}</label>
+                </div>
+                <div class="row">
+                  <label class="col-md-2">Jumlah Pulang</label>
+                  <strong>:</strong>
+                  <label class="col">{{jml_absen_pulang}}</label>
+                </div>
+                <hr>
+                <h4 class="text-secondary mb-3">Absensi Bulan : 
+                  {% for bulan in bulanList %}
+                  {% if bulan[0] == absensi_bulan %}
+                  {{ bulan[1] }}
+                  {% endif %}
+                  {% endfor %} {{absensi_tahun}}
+                </h4>
+                <table id="riwayatabsensi" class="table table-bordered table-hover">
+                  <thead>
+				            <tr>
+                        <th>No</th>
+                        <th>Tanggal Absen</th>
+                        <th>Waktu Absen</th>
+                        <th class="text-center">Jadwal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{loop.index}}</td>
+                        <td>{{item[4]}}</td>
+                        <td>{{item[5]}}</td>
+                        <td class="text-center">
+                          {% if item[6] == 1 %}
+                          <span class="badge bg-warning px-3" style="font-size: 15px">Masuk</span>
+                          {% else %}
+                          <span class="badge bg-info px-3" style="font-size: 15px">Pulang</span>
+                          {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            {% endif %}
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% include "templateadmin/footer.html" %}
+
+<script>
+  $(function () {
+    $('#riwayatabsensi').DataTable({
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": true,
+      "responsive": false,
+    });
+  });
+</script>
+</body>
+</html>

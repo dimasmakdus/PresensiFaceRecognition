@@ -53,13 +53,13 @@
       </li>
       <li class="nav-item dropdown user-menu">
         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-          <img src="{{ url_for('static', filename='dist/img/user1-128x128.jpg') }}" class="user-image img-circle elevation-2" alt="User Image">
+          <img src="{{ url_for('static', filename='dist/img/avatar_male.png') }}" class="user-image img-circle elevation-2" alt="User Image">
           <span class="d-none d-md-inline">{{session['full_name']}}</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <!-- User image -->
           <li class="user-header bg-primary">
-            <img src="{{ url_for('static', filename='dist/img/user1-128x128.jpg') }}" class="img-circle elevation-2" alt="User Image">
+            <img src="{{ url_for('static', filename='dist/img/avatar_male.png') }}" class="img-circle elevation-2" alt="User Image">
             <p>
               {{session['full_name']}} <br>
               <small>— {{session['access_name']}}</small>
@@ -99,7 +99,7 @@
       <!-- Sidebar user (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="{{ url_for('static', filename='dist/img/user1-128x128.jpg') }}" class="img-circle elevation-2" alt="User Image">
+          <img src="{{ url_for('static', filename='dist/img/avatar_male.png') }}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
           <a href="#" class="d-block">{{session['full_name']}}</a>
@@ -154,13 +154,46 @@
               </p>
             </a>
           </li> -->
-          <li class="nav-item">
-            <a href="/riwayatabsensi" class="nav-link {{'active' if navLink == 'riwayatabsensi' else ''}}">
+          <li class="nav-item {{'menu-open' if navLink == 'riwayatabsensi' or navLink == 'absensihariini' or navLink == 'absensipegawai' or navLink == 'absensi_khusus' else ''}}">
+            <a href="#" class="nav-link {{'active' if navLink == 'riwayatabsensi' or navLink == 'absensihariini' or navLink == 'absensipegawai' or navLink == 'absensi_khusus' else ''}}">
               <i class="nav-icon fas fa-calendar-check"></i>
               <p>
-                Riwayat Absen Pegawai
+                Absensi
+                <i class="right fas fa-angle-left"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/absensihariini" class="nav-link {{'active' if navLink == 'absensihariini' else ''}}">
+                  <i class="nav-icon far fa-circle"></i>
+                  <p>
+                    Absensi Hari Ini
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/absensipegawai" class="nav-link {{'active' if navLink == 'absensipegawai' else ''}}">
+                  <i class="nav-icon far fa-circle"></i>
+                  <p>
+                    Absensi Pegawai
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/riwayatabsensi" class="nav-link {{'active' if navLink == 'riwayatabsensi' else ''}}">
+                  <i class="nav-icon far fa-circle"></i>
+                  <p>
+                    Riwayat Absensi
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/absensi_khusus" class="nav-link {{'active' if navLink == 'absensi_khusus' else ''}}">
+                  <i class="nav-icon far fa-circle"></i>
+                  <p>Konfirmasi Absen Khusus</p>
+                </a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item {{'menu-open' if navLink == 'pengguna' or navLink == 'hakakses' else ''}}">
             <a href="#" class="nav-link {{'active' if navLink == 'pengguna' or navLink == 'hakakses' else ''}}">
@@ -238,8 +271,8 @@
           {% endif %}
 
           {% if session['access'] == 2 %}
-          <li class="nav-item {{'menu-open' if navLink == 'riwayatabsensi' else ''}}">
-            <a href="#" class="nav-link {{'active' if navLink == 'riwayatabsensi' else ''}}">
+          <li class="nav-item {{'menu-open' if navLink == 'riwayatabsensi_pegawai' or navLink == 'absensi_khusus' else ''}}">
+            <a href="#" class="nav-link {{'active' if navLink == 'riwayatabsensi_pegawai' or navLink == 'absensi_khusus' else ''}}">
               <i class="nav-icon fas fa-database"></i>
               <p>
                 Data Absensi
@@ -248,7 +281,7 @@
             </a>
             <ul class="nav nav-treeview" >
               <li class="nav-item">
-                <a href="/riwayatabsensi" class="nav-link {{'active' if navLink == 'riwayatabsensi' else ''}}">
+                <a href="/riwayatabsensi_pegawai" class="nav-link {{'active' if navLink == 'riwayatabsensi_pegawai' else ''}}">
                   <i class="nav-icon fas fa-history"></i>
                   <p>
                     Riwayat Absensi
@@ -256,15 +289,9 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="/absensi_khusus" class="nav-link {{'active' if navLink == 'absensi_khusus' else ''}}">
                   <i class="fas fa-bookmark nav-icon"></i>
                   <p>Absensi Khusus</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-clipboard-check nav-icon"></i>
-                  <p>Konfirmasi Absensi</p>
                 </a>
               </li>
             </ul>

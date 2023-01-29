@@ -24,6 +24,7 @@
         <div class="container-fluid">
           <!-- Small boxes (Stat box) -->
           <div class="row">
+            {% if session['access'] == 1 %}
             <div class="col-lg-3 col-6">
               <!-- small box -->
               <div class="small-box bg-info">
@@ -38,6 +39,20 @@
                 <a href="/datapegawai" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
               </div>
             </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-primary">
+                <div class="inner">
+                  <h3>{{count[3]}}</h3>
+  
+                  <p>Data Jabatan</p>
+                </div>
+                <div class="icon">
+                  <i class="fas fa-user-check"></i>
+                </div>
+                <a href="/datajabatan" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
             <!-- ./col -->
             <div class="col-lg-3 col-6">
               <!-- small box -->
@@ -50,58 +65,185 @@
                 <div class="icon">
                   <i class="ion ion-stats-bars"></i>
                 </div>
-                <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="/absensihariini" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
               </div>
             </div>
             <!-- ./col -->
-            <!-- <div class="col-lg-3 col-6">
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
               <div class="small-box bg-warning">
                 <div class="inner">
-                  <h3>44</h3>
+                  <h3>{{count[2]}}</h3>
   
-                  <p>User Registrations</p>
+                  <p>Total Absensi</p>
                 </div>
                 <div class="icon">
-                  <i class="ion ion-person-add"></i>
+                  <i class="ion ion-stats-bars"></i>
                 </div>
-                <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="/riwayatabsensi" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+            {% endif %}
+            {% if session['access'] == 2 %}
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-success">
+                <div class="inner">
+                  <h3>{{count[0]}}</h3>
+  
+                  <p>Absensi Hari Ini</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-stats-bars"></i>
+                </div>
+                <a href="/absensihariini" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
               </div>
             </div>
             <div class="col-lg-3 col-6">
-              <div class="small-box bg-danger">
+              <!-- small box -->
+              <div class="small-box bg-warning">
                 <div class="inner">
-                  <h3>65</h3>
+                  <h3>{{count[1]}}</h3>
   
-                  <p>Unique Visitors</p>
+                  <p>Jumlah Absensi</p>
                 </div>
                 <div class="icon">
-                  <i class="ion ion-pie-graph"></i>
+                  <i class="ion ion-stats-bars"></i>
                 </div>
-                <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="/riwayatabsensi_pegawai" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
               </div>
             </div>
-          </div> -->
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-primary">
+                <div class="inner">
+                  <h3>{{count[2]}}</h3>
+  
+                  <p>Jumlah Absensi Khusus</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-stats-bars"></i>
+                </div>
+                <a href="/absensi_khusus" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+            {% endif %}
+            <!-- ./col -->
+          </div>
           <!-- /.row -->
 
-        </div><!-- /.container-fluid -->
+          {% if session['access'] == 1 %}
+          <div class="row">
+            <div class="col-md-6">
+  
+              <!-- DONUT CHART -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Jumlah Pegawai</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="jumlahDivisi" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.col (LEFT) -->
+
+            <div class="col-md-6">
+              <!-- DONUT CHART -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Absensi Khusus</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="absensiKhusus" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </div>
+          </div>
+          {% endif %}
+
+        <!-- /.container-fluid -->
       </section>
     <!-- /.content -->
   </div>
 
+  <div id="divisiTitle" class="d-none">{{count[4]}}</div>
+  <div id="divisiCount" class="d-none">{{count[5]}}</div>
+  <div id="absenKhusus" class="d-none">{{count[6]}}</div>
 {% include "templateadmin/footer.html" %}
 
 <script>
   $(function () {
-    $('#datapegawai').DataTable({
-      "paging": true,
-      "lengthChange": true,
-      "searching": true,
-      "ordering": true,
-      "info": true,
-      "autoWidth": true,
-      "responsive": true,
-    });
-  });
+    /* ChartJS
+     * -------
+     * Here we will create a few charts using ChartJS
+     */
+
+    //-------------
+    //- DIVISI PEGAWAI CHART -
+    //-------------
+    // Get context with jQuery - using jQuery's .get() method.
+    var jumlahDivisiCanvas = $('#jumlahDivisi').get(0).getContext('2d')
+    var divisiTitle = JSON.parse($('#divisiTitle').text())
+    var divisiCount = JSON.parse($('#divisiCount').text())
+    var divisiData        = {
+      labels: divisiTitle,
+      datasets: [
+        {
+          data: divisiCount,
+          backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#d2d6dg'],
+        }
+      ]
+    }
+    var divisiOptions     = {
+      maintainAspectRatio : false,
+      responsive : true,
+    }
+    //Create pie or douhnut chart
+    // You can switch between pie and douhnut using the method below.
+    new Chart(jumlahDivisiCanvas, {
+      type: 'doughnut',
+      data: divisiData,
+      options: divisiOptions
+    })
+
+
+    //-------------
+    //- ABSENSI KHUSUS CHART -
+    //-------------
+    // Get context with jQuery - using jQuery's .get() method.
+    var absensiKhususCanvas = $('#absensiKhusus').get(0).getContext('2d')
+    var dataAbsenKhusus = JSON.parse($('#absenKhusus').text())
+    var absensiKhususData        = {
+      labels: [
+          'Cuti',
+          'Izin',
+          'Sakit',
+      ],
+      datasets: [
+        {
+          data: dataAbsenKhusus[0],
+          backgroundColor : ['#f56954', '#00a65a', '#f39c12'],
+        }
+      ]
+    }
+    var absensiKhususOptions     = {
+      maintainAspectRatio : false,
+      responsive : true,
+    }
+    //Create pie or douhnut chart
+    // You can switch between pie and douhnut using the method below.
+    new Chart(absensiKhususCanvas, {
+      type: 'doughnut',
+      data: absensiKhususData,
+      options: absensiKhususOptions
+    })
+
+  })
 </script>
 </body>
 </html>

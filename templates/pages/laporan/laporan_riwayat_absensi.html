@@ -1,0 +1,78 @@
+{% include "head.html" %}
+
+<section class="content p-4">
+  <div class="containter-fluid">
+    <div class="text-center mb-3">
+      <h4>Laporan Rekap Absensi Pegawai PT. Mediatam Kreasi Informatika</h4>
+      <h4>
+        Periode {% for bulan in bulanList %} {% if bulan[0] == absensi_bulan %}
+        {{ bulan[1] }} {% endif %} {% endfor %} {{absensi_tahun}}
+      </h4>
+    </div>
+    <hr />
+    <div class="row">
+      <label class="col-md-2">Jumlah Masuk</label>
+      <strong>:</strong>
+      <label class="col">{{jml_absen_masuk}}</label>
+    </div>
+    <div class="row">
+      <label class="col-md-2">Jumlah Pulang</label>
+      <strong>:</strong>
+      <label class="col">{{jml_absen_pulang}}</label>
+    </div>
+    <table id="riwayatabsensi" class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>ID</th>
+          <th>Nama Pegawai</th>
+          <th>Jabatan</th>
+          <th>Tanggal Absen</th>
+          <th>Waktu Absen</th>
+          <th class="text-center">Jadwal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in data %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{item[1]}}</td>
+          <td>{{item[2]}}</td>
+          <td>{{item[3]}}</td>
+          <td>{{item[4]}}</td>
+          <td>{{item[5]}}</td>
+          <td class="text-center">
+            {% if item[6] == 1 %}
+            <span class="badge bg-warning px-3" style="font-size: 15px"
+              >Masuk</span
+            >
+            {% else %}
+            <span class="badge bg-info px-3" style="font-size: 15px"
+              >Pulang</span
+            >
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="row mr-5 mt-5">
+      <div class="col-6 text-center">
+        <h5 class="mb-5">Staff Administrasi,</h5>
+        <br />
+        <h5>............................</h5>
+      </div>
+      <div class="col-6 text-center">
+        <h5 class="mb-5">Pimpinan,</h5>
+        <br />
+        <h5>............................</h5>
+      </div>
+    </div>
+  </div>
+</section>
+{% include "script.html" %}
+
+<script>
+  window.print();
+</script>

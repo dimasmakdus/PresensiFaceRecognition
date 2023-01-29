@@ -1,0 +1,266 @@
+{% include "templateadmin/header.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Absensi Khusus</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Absensi Khusus</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Absensi Khusus</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% if session['access'] == 2 %}
+                <div class="mb-3">
+                    <a class="btn btn-primary" data-toggle="modal" data-target="#tambah-absensi-khusus"><i class="fas fa-plus mr-2"></i> Tambah Absensi Khusus</a>
+                </div>
+                {% endif %}
+                <table id="riwayatabsensi" class="table table-bordered table-hover">
+                  <thead>
+				            <tr>
+                        <th>No</th>
+                        {% if session['access'] == 1 %}
+                        <th>Pegawai</th>
+                        <th>Jabatan</th>
+                        {% endif %}
+                        <th>Judul</th>
+                        <th>Deskripsi</th>
+                        <th>Tanggal Izin</th>
+                        <th class="text-center">Jenis Izin</th>
+                        <th class="text-center">Status</th>
+                        {% if session['access'] == 1 %}
+                        <th class="text-center">Aksi</th>
+                        {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{loop.index}}</td>
+                        {% if session['access'] == 1 %}
+                        <td>{{item[7]}}</td>
+                        <td>{{item[8]}}</td>
+                        {% endif %}
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}}</td>
+                        <td>{{item[3]}}</td>
+                        <td class="text-center">
+                          {% if item[4] == 1 %}
+                          <span class="badge bg-secondary px-3" style="font-size: 15px">Cuti</span>
+                          {% elif item[4] == 2 %}
+                          <span class="badge bg-info px-3" style="font-size: 15px">Izin</span>
+                          {% elif item[4] == 3 %}
+                          <span class="badge bg-danger px-3" style="font-size: 15px">Sakit</span>
+                          {% endif %}
+                        </td>
+                        <td class="text-center">
+                          {% if item[5] == 0 %}
+                          <span class="badge bg-warning px-3" style="font-size: 15px">Menunggu Konfirmasi</span>
+                          {% elif item[5] == 1 %}
+                          <span class="badge bg-success px-3" style="font-size: 15px">Disetujui</span>
+                          {% elif item[5] == 2 %}
+                          <span class="badge bg-danger px-3" style="font-size: 15px">Ditolak</span>
+                          {% endif %}
+                        </td>
+                        {% if session['access'] == 1 %}
+                        <td class="text-center">
+                          {% if item[5] == 0 %}
+                          <span data-toggle="tooltip" data-placement="top" title="Konfirmasi">
+                              <a class="btn btn-sm btn-warning btn-edit-pegawai" data-toggle="modal" data-target="#edit-{{item[0]}}"><i class="fas fa-check"></i></a>
+                          </span>
+                          {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+
+                    <!-- Modal Edit -->
+                    <div class="modal fade" id="edit-{{item[0]}}">
+                      <div class="modal-dialog modal-lg">
+                          <div class="modal-content">
+                              <form class="form-horizontal" action="/absensi_khusus_update_submit" method="POST">
+                                  <div class="modal-header">
+                                      <h4 class="modal-title">Ubah Data Pegawai</h4>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body p-4">
+                                    <div class="form-group row">
+                                      <label for="absensi_khusus_judul" class="col-sm-3 col-form-label">Judul</label>
+                                      :
+                                      <div class="col">
+                                        {{item[1]}}
+                                      </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="absensi_khusus_deskripsi" class="col-sm-3 col-form-label">Deskripsi / Keterangan</label>
+                                        :
+                                        <div class="col">
+                                          {{item[2]}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                      <label for="absensi_khusus_date" class="col-sm-3 col-form-label">Tanggal Izin</label>
+                                      :
+                                      <div class="col">
+                                        {{item[3]}}
+                                      </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="absensi_khusus_type" class="col-sm-3 col-form-label">Jenis Izin</label>
+                                        :
+                                        <div class="col">
+                                          {% if item[4] == 1 %}
+                                          <span class="badge bg-secondary" style="font-size: 15px">Cuti</span>
+                                          {% elif item[4] == 2 %}
+                                          <span class="badge bg-info" style="font-size: 15px">Izin</span>
+                                          {% elif item[4] == 3 %}
+                                          <span class="badge bg-danger" style="font-size: 15px">Sakit</span>
+                                          {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="absensi_khusus_type" class="col-sm-3 col-form-label">Status</label>
+                                        :
+                                        <div class="col">
+                                          {% if item[5] == 0 %}
+                                          <span class="badge bg-warning" style="font-size: 15px">Menunggu Konfirmasi</span>
+                                          {% elif item[5] == 1 %}
+                                          <span class="badge bg-success" style="font-size: 15px">Disetujui</span>
+                                          {% elif item[5] == 2 %}
+                                          <span class="badge bg-danger" style="font-size: 15px">Ditolak</span>
+                                          {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                      <label for="absensi_khusus_status" class="col-sm-3 col-form-label">Keputusan <span class="text-danger">*</span></label>
+                                      <div class="col-sm-6">
+                                        <select class="form-control select2" name="absensi_khusus_status" id="absensi_khusus_status" required>
+                                          <option value="" selected disabled>-- Pilih Keputusan --</option>
+                                          <option value="1">Disetujui</option>
+                                          <option value="2">Ditolak</option>
+                                      </select>
+                                      </div>
+                                  </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <input type="hidden" name="absensi_khusus_id" value="{{item[0]}}">
+                                      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Konfirmasi</button>
+                                      <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                                  </div>
+                              </form>
+                          </div>
+                          <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                    </div>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+
+      <!-- Modal Tambah Data -->
+      <div class="modal fade" id="tambah-absensi-khusus">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form class="form-horizontal" action="/absensi_khusus_submit" method="POST">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tambah Absensi Khusus</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body px-4">
+                      <div class="card-subtitle mb-3">
+                          Silakan isi data utama terlebih dahulu.
+                          Semua bidang yang ditandai dengan (<span class="text-danger">*</span>) adalah wajib.
+                      </div>
+                        <div class="form-group row">
+                            <label for="absensi_khusus_judul" class="col-sm-3 col-form-label">Judul <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="absensi_khusus_judul" name="absensi_khusus_judul" value="{{ newnbr }}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="absensi_khusus_deskripsi" class="col-sm-3 col-form-label">Deskripsi / Keterangan <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <textarea rows="4" class="form-control" id="absensi_khusus_deskripsi" name="absensi_khusus_deskripsi" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="absensi_khusus_date" class="col-sm-3 col-form-label">Tanggal Izin <span class="text-danger">*</span></label>
+                          <div class="col-sm-9">
+                            <input type="date" class="form-control" id="absensi_khusus_date" name="absensi_khusus_date" value="{{ newnbr }}" required>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="absensi_khusus_type" class="col-sm-3 col-form-label">Jenis Izin <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                              <select class="form-control select2" name="absensi_khusus_type" id="absensi_khusus_type" required>
+                                <option selected disabled>-- Pilih Izin --</option>
+                                <option value="1">Cuti</option>
+                                <option value="2">Izin</option>
+                                <option value="3">Sakit</option>
+                            </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                        <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-sign-out-alt"></i> Kembali</a>
+                    </div>
+                </form>
+            </div>
+        <!-- /.modal-content -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% include "templateadmin/footer.html" %}
+
+<script>
+  $(function () {
+    $('#riwayatabsensi').DataTable({
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": true,
+      "responsive": false,
+    });
+  });
+</script>
+</body>
+</html>

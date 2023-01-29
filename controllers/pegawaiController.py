@@ -126,10 +126,11 @@ def face_recognition():  # generate frame by frame from camera
                              "  left join pegawai b on a.img_person = b.pegawai_id "
                              " where img_id = " + str(id))
             s = mycursor.fetchone()
-            s = '' + ''.join(s)
 
             # print(confidence)
-            if confidence >= 85 and confidence <= 90:
+            # if confidence >= 85 and confidence <= 90 and (s is not None):
+            if confidence >= int(env['CONFIDENCE_START']) and confidence <= int(env['CONFIDENCE_END']) and (s is not None):
+                s = '' + ''.join(s)
                 cv2.putText(img, s, (x, y - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
             else:
@@ -189,7 +190,8 @@ def presensi_recognition():  # generate frame by frame from camera
             confidence = int(100 * (1 - pred / 300))
 
             # print(confidence)
-            if confidence >= 85 and confidence <= 90 and not justscanned:
+            # if confidence >= 85 and confidence <= 90 and not justscanned:
+            if confidence >= int(env['CONFIDENCE_START']) and confidence <= int(env['CONFIDENCE_END']) and not justscanned:
                 global cnt
                 cnt += 1
 
@@ -261,7 +263,7 @@ def presensi_recognition():  # generate frame by frame from camera
                             presensi_status = 1
                         else:
                             mycursor.execute(
-                                "insert into access_history (accs_date, accs_prsn) values('"+str(date.today())+"', '" + pnbr + "')")
+                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+int(jam_masuk[0])+"')")
                             mydb.commit()
                             print("BELUM ABSEN PAGI HARI INI")
 
@@ -279,7 +281,7 @@ def presensi_recognition():  # generate frame by frame from camera
                             presensi_status = 1
                         else:
                             mycursor.execute(
-                                "insert into access_history (accs_date, accs_prsn) values('"+str(date.today())+"', '" + pnbr + "')")
+                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+int(jam_pulang[0])+"')")
                             mydb.commit()
                             print("BELUM ABSEN SORE HARI INI")
 
@@ -385,9 +387,14 @@ def addprsn_submit():
     prsname = request.form.get('txtname')
     prsskill = request.form.get('optskill')
     status = request.form.get('status_pegawai')
+    username_pegawai = request.form.get('username_pegawai')
+    password_pegawai = request.form.get('password_pegawai')
 
     mycursor.execute("""INSERT INTO `pegawai` (`pegawai_id`, `pegawai_name`, `pegawai_jabatan_id`, `pegawai_status`) VALUES
                     ('{}', '{}', '{}', '{}')""".format(prsnbr, prsname, prsskill, status))
+
+    mycursor.execute("""INSERT INTO `users` (`username`, `password`, `id_user_role`, `status`, `full_name`, `user_pegawai_id`) VALUES
+                    ('{}', '{}', '{}', '{}', '{}', '{}')""".format(username_pegawai, password_pegawai, 2, status, prsname, prsnbr))
 
     mydb.commit()
 
@@ -444,7 +451,7 @@ def vfdataset_page(prs):
         "select * from img_dataset where img_person = "+str(prs)+" limit 1")
     checkDataset = mycursor.fetchone()
 
-    if len(checkDataset) > 0:
+    if (checkDataset is not None) and (len(checkDataset) > 0):
         # Hapus db img_dataset
         mycursor.execute(
             "DELETE FROM img_dataset WHERE img_person = "+str(prs))

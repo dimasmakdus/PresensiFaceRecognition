@@ -7,7 +7,8 @@ from controllers.jabatanController import jabatan_table, jabatan_submit, jabatan
 from controllers.userController import user_table, user_submit, user_update_submit, delete_user
 from controllers.accessController import access_table, access_submit, access_update_submit, delete_access
 from controllers.jamkerjaController import jamkerja_table, jamkerja_update_submit
-from controllers.absensiController import absensi_riwayat_table
+from controllers.absensiController import absensi_riwayat_table, absensi_hari_ini, absensi_pegawai, absensi_riwayat_userpegawai, absensi_khusus, absensi_khusus_submit, absensi_khusus_update_submit
+from controllers.laporanController import laporan_absensi_pegawai, laporan_absensi_admin, laporan_riwayat_absensi
 import os
 from dotenv import dotenv_values
 
@@ -16,10 +17,12 @@ env = dotenv_values(".env")
 app = Flask(__name__)
 app.secret_key = os.urandom(32)
 
+
 @app.route('/getDatasetImg/<string:imgName>')
 def getDatasetImg(imgName):
     filePath = env['DATASET']
     return send_file(os.path.join(filePath, imgName))
+
 
 # Home
 app.route('/', methods=['GET'])(home_index)
@@ -54,7 +57,19 @@ app.route('/jabatan_update_submit', methods=['POST'])(jabatan_update_submit)
 app.route('/delete_jabatan/<nbr>')(delete_jabatan)
 
 # Riwayat Absensi
+app.route("/absensihariini")(absensi_hari_ini)
+app.route("/absensipegawai")(absensi_pegawai)
 app.route("/riwayatabsensi")(absensi_riwayat_table)
+app.route("/riwayatabsensi_pegawai")(absensi_riwayat_userpegawai)
+app.route("/absensi_khusus")(absensi_khusus)
+app.route("/absensi_khusus_submit", methods=['POST'])(absensi_khusus_submit)
+app.route("/absensi_khusus_update_submit",
+          methods=['POST'])(absensi_khusus_update_submit)
+
+# Laporan Absensi
+app.route("/laporan_absensi_pegawai")(laporan_absensi_pegawai)
+app.route("/laporan_absensi_admin")(laporan_absensi_admin)
+app.route("/laporan_riwayat_absensi")(laporan_riwayat_absensi)
 
 # Akun
 # Pengguna
