@@ -90,4 +90,4 @@ app.route("/jamkerja")(jamkerja_table)
 app.route('/jamkerja_update_submit', methods=['POST'])(jamkerja_update_submit)
 
 if __name__ == "__main__":
-app.run(debug=True)
+    app.run(host=env['FLASK_HOST'], port=int(env['FLASK_PORT']), debug=env['FLASK_DEBUG'])
