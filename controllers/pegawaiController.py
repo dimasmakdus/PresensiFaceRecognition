@@ -263,7 +263,7 @@ def presensi_recognition():  # generate frame by frame from camera
                             presensi_status = 1
                         else:
                             mycursor.execute(
-                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+int(jam_masuk[0])+"')")
+                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+str(jam_masuk[0])+"')")
                             mydb.commit()
                             print("BELUM ABSEN PAGI HARI INI")
 
@@ -281,7 +281,7 @@ def presensi_recognition():  # generate frame by frame from camera
                             presensi_status = 1
                         else:
                             mycursor.execute(
-                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+int(jam_pulang[0])+"')")
+                                "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+str(jam_pulang[0])+"')")
                             mydb.commit()
                             print("BELUM ABSEN SORE HARI INI")
 
