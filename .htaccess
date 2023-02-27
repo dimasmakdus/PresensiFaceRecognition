@@ -1,5 +1,0 @@
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN PassengerAppRoot
-"/home/preh2325/PresensiFaceRecognition" 
-PassengerBaseURI "/" 
-PassengerPython "/home/preh2325/virtualenv/PresensiFaceRecognition/3.10/bin/python3.10" 
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
