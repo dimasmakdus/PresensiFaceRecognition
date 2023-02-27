@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/usercpanel/public_html/
+    - export DEPLOYPATH=/home/preh2325/public_html/
     - /bin/cp -r * $DEPLOYPATH
