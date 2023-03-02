@@ -213,6 +213,7 @@ def presensi_recognition():  # generate frame by frame from camera
                                  "  left join jabatan c on b.pegawai_jabatan_id = c.jabatan_id"
                                  " where img_id = " + str(id))
                 row = mycursor.fetchone()
+                print(cnt)
 
                 if row:
                     pnbr = row[0]
@@ -519,13 +520,19 @@ def loadData():
         mycursor.execute(
             "SELECT pegawai_name, jabatan_name FROM view_pegawai WHERE pegawai_id = "+str(id)+" limit 1")
         data = mycursor.fetchone()
+
+        mycursor.execute(
+            "SELECT img_id, img_person FROM img_dataset WHERE img_person = "+str(id)+" limit 1")
+        img_dataset = mycursor.fetchone()
+
         response = {
             'status': status,
             'msg': msg,
             'data': {
                 'pegawai_id': id,
                 'pegawai_name': data[0],
-                'jabatan_name': data[1]
+                'jabatan_name': data[1],
+                'img_id': img_dataset[0]
             }
         }
     else:
@@ -535,6 +542,7 @@ def loadData():
             'data': {
                 'pegawai_name': '',
                 'jabatan_name': '',
+                'img_id': ''
             }
         }
 
