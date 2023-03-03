@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, session, redirect, url_for, Response, jsonify, send_file
 from controllers.authController import login, authentication, logout
-from controllers.homeController import home_index
+from controllers.homeController import home_index, absensi2
 from controllers.dashboardController import dashboard_index
-from controllers.pegawaiController import pegawai_table, pegawai_fr, train_classifier, addprsn_submit, updateprsn_submit, delete_pegawai, vfdataset_page, vidfeed_dataset, video_feed, video_presensi, countTodayScan, countImgFrameScan, loadData
+from controllers.pegawaiController import pegawai_table, pegawai_fr, train_classifier, addprsn_submit, updateprsn_submit, delete_pegawai, vfdataset_page, vidfeed_dataset, video_feed, video_presensi, countTodayScan, countImgFrameScan, loadData, loadAbsensi2, submitAbsensi2,clearAbsensi2, video_presensi2
 from controllers.jabatanController import jabatan_table, jabatan_submit, jabatan_update_submit, delete_jabatan
 from controllers.userController import user_table, user_submit, user_update_submit, delete_user
 from controllers.accessController import access_table, access_submit, access_update_submit, delete_access
@@ -26,6 +26,7 @@ def getDatasetImg(imgName):
 
 # Home
 app.route('/', methods=['GET'])(home_index)
+app.route('/absensi2', methods=['GET'])(absensi2)
 
 # Login
 app.route('/login')(login)
@@ -46,9 +47,13 @@ app.route('/vfdataset_page/<prs>')(vfdataset_page)
 app.route('/vidfeed_dataset/<nbr>')(vidfeed_dataset)
 app.route('/video_feed')(video_feed)
 app.route('/video_presensi')(video_presensi)
+app.route('/video_presensi2')(video_presensi2)
 app.route('/countTodayScan')(countTodayScan)
 app.route('/countImgFrameScan')(countImgFrameScan)
 app.route('/loadData', methods=['GET', 'POST'])(loadData)
+app.route('/loadAbsensi2', methods=['GET', 'POST'])(loadAbsensi2)
+app.route('/submitAbsensi2', methods=['POST'])(submitAbsensi2)
+app.route('/clearAbsensi2', methods=['POST'])(clearAbsensi2)
 
 # Data Jabatan
 app.route("/datajabatan")(jabatan_table)

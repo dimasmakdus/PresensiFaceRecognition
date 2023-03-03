@@ -24,6 +24,9 @@ resourcePath = env['HAARCASCADE_FRONTALFACE_DEFAULT']
 datasetPath = env['DATASET']
 deviceCamera = int(env['CAMERA_DEVICE'])
 
+datapegawai = list()
+datacheck = 0
+
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generate dataset >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -343,6 +346,84 @@ def presensi_recognition():  # generate frame by frame from camera
         if key == 27:
             break
 
+def absensi2_recognition():  # generate frame by frame from camera
+    def draw_boundary(img, classifier, scaleFactor, minNeighbors, color, text, clf):
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        features = classifier.detectMultiScale(
+            gray_image, scaleFactor, minNeighbors)
+
+        global datacheck
+        global datapegawai
+        coords = []
+
+        for (x, y, w, h) in features:
+            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+            id, pred = clf.predict(gray_image[y:y + h, x:x + w])
+            confidence = int(100 * (1 - pred / 300))
+
+            mycursor.execute("select b.pegawai_id, b.pegawai_name "
+                             "  from img_dataset a "
+                             "  left join pegawai b on a.img_person = b.pegawai_id "
+                             " where img_id = " + str(id))
+            dt = mycursor.fetchone()
+
+            # if confidence >= 85 and confidence <= 90 and (s is not None):
+            if confidence >= int(env['CONFIDENCE_START']) and confidence <= int(env['CONFIDENCE_END']) and (dt is not None):
+                datacheck += 1
+
+                id = '' + ''.join(dt[0])
+                s = '' + ''.join(dt[1])
+                # print(s)
+
+                datapegawai.append(id)
+                for row in datapegawai:
+                    if(row == id):
+                        datapegawai.remove(id)
+                
+                datapegawai.append(id)
+
+                result = [*set(datapegawai)]
+
+                # print(result)
+
+                if(int(datacheck) == 30):
+                    datacheck = 0
+                    datapegawai.clear()
+
+                cv2.putText(img, s, (x, y - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
+            else:
+                cv2.putText(img, "TIDAK DIKENALI", (x, y - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 1, cv2.LINE_AA)
+
+            coords = [x, y, w, h]
+        return coords
+
+    def recognize(img, clf, faceCascade):
+        coords = draw_boundary(img, faceCascade, 1.1, 10,
+                               (255, 255, 0), "Face", clf)
+        return img
+
+    faceCascade = cv2.CascadeClassifier(resourcePath)
+    clf = cv2.face.LBPHFaceRecognizer_create()
+    clf.read("classifier.xml")
+
+    wCam, hCam = 500, 400
+
+    cap = cv2.VideoCapture(deviceCamera)
+    cap.set(3, wCam)
+    cap.set(4, hCam)
+
+    while True:
+        ret, img = cap.read()
+        img = recognize(img, clf, faceCascade)
+
+        frame = cv2.imencode('.jpg', img)[1].tobytes()
+        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        key = cv2.waitKey(1)
+        if key == 27:
+            break
 
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONTROLLER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 def pegawai_table():
@@ -486,6 +567,11 @@ def video_presensi():
     # Video streaming route. Put this in the src attribute of an img tag
     return Response(presensi_recognition(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+def video_presensi2():
+    # Cam Presensi Recognition
+    # Video streaming route. Put this in the src attribute of an img tag
+    return Response(absensi2_recognition(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 def countTodayScan():
     mycursor.execute("select count(*) "
@@ -550,3 +636,28 @@ def loadData():
     presensi_msg = ""
     presensi_status = 0
     return jsonify(response=response)
+
+def loadAbsensi2():
+    mycursor.execute("select a.pegawai_id, a.pegawai_name, a.jabatan_name, date_format(a.accs_added, '%H:%i:%s') "
+                     "  from view_absensi a "
+                     " order by 1 desc")
+    data = mycursor.fetchall()
+ 
+    return jsonify(response = data)
+
+def submitAbsensi2():
+    global datapegawai
+    result = [*set(datapegawai)]
+
+    for id in result:
+        mycursor.execute(
+            "insert into access_history (accs_date, accs_prsn) values('"+str(date.today())+"', '" + id + "')")
+        mydb.commit()
+ 
+    return jsonify(response = 'Absensi Berhasil Tersimpan')
+
+def clearAbsensi2():
+    mycursor.execute("delete from access_history")
+    mydb.commit()
+ 
+    return jsonify(response = 'Absensi Berhasil Tersimpan')

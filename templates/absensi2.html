@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "head.html" %}
+
+</head>
+<body style="background-image: url('static/dist/img/low-poly-wireframe.webp'); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;">
+
+<!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <lottie-player src="{{ url_for('static', filename='dist/lottie/90963-face-recognition-face-scan-by-ai.json') }}" background="transparent"  speed="1"  style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+    <span>Membuka presensi wajah...</span>
+  </div>
+    {% include "navbar-home.html" %}
+ 
+<div class="container-fluid">
+    <div class="row p-3 mt-2">
+        <div class="col-md-6">
+            <div class="card">
+                {% if checkdata %}
+                    <img src="/video_presensi2" width="100%" class="rounded">
+                {% else %}
+                    <div class="p-3">
+                        <img src="{{ url_for('static', filename='dist/img/no_dataset.png') }}" width="100%" class="img-thumbnail">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center py-2 bg-info">
+                        <h4 style="margin: 0" class="mt-2" id="date-part"></h4>
+                        <b><h1 id="time-part"></h1></b>
+                      </div>
+                <div class="card-body bg-dark text-center">
+                    
+                    <!-- <h5><span class="badge badge-pill badge-primary p-3 mb-3">PENGENALAN WAJAH</span></h5> -->
+                    <div class="row">
+                        <span class="mr-3">
+                            <button type="button" class="btn btn-primary" id="tambahAbsensi"><i class="fas fa-plus mr-2"></i>KLIK ABSEN</button>
+                        </span>
+                        <span>
+                            <button type="button" class="btn btn-danger" id="hapusAbsensi"><i class="fas fa-trash mr-2"></i>CLEAR / HAPUS</button>
+                        </span>
+                    </div>
+                    <div style="height:500px; overflow-y:auto;">
+                        <h3>Today Scan</h3>
+                        <table class="table" >
+                            <thead>
+                                <tr>
+                                    <th>ID Pegawai #</th>
+                                    <th>Nama</th>
+                                    <th>Jabatan</th>
+                                    <th>Tanggal & Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scandata">
+             
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+              </div>
+        </div>
+    </div>
+</div>
+
+{% include "script.html" %}
+
+<script type="text/javascript">
+    reloadTable();
+    function reloadTable() {
+        $.ajax({
+            url: '/loadAbsensi2',
+            type: 'GET',
+            dataType: 'json',
+            success: function(res){
+                var data = res.response
+                var tr = $("#scandata");
+                tr.empty();
+
+                if (data.length > 0) {
+                    for (let i = 0; i < data.length; i++) {
+                        tr.append('<tr>'+
+                                        '<td>'+data[i][0]+'</td>'+
+                                        '<td>'+data[i][1]+'</td>'+
+                                        '<td>'+data[i][2]+'</td>'+
+                                        '<td>'+data[i][3]+'</td>'+
+                                    '</tr>');
+                    }
+                }
+            },
+            error: function(result){
+                console.log('no result!')
+            }
+        });
+    }
+
+    $('#tambahAbsensi').click(function() {
+        $.ajax({
+            url: '/submitAbsensi2',
+            type: 'POST',
+            dataType: 'json',
+            success: function(res){
+                reloadTable()
+            },
+            error: function(result){
+                console.log('no result!')
+            }
+        });
+    })
+    $('#hapusAbsensi').click(function() {
+        $.ajax({
+            url: '/clearAbsensi2',
+            type: 'POST',
+            dataType: 'json',
+            success: function(res){
+                reloadTable()
+            },
+            error: function(result){
+                console.log('no result!')
+            }
+        });
+    })
+</script>
+
+<script>
+    $(document).ready(function() {
+    var interval = setInterval(function() {
+        var momentNow = moment();
+        $('#date-part').html(momentNow.format('DD-MM-YYYY'));
+        $('#time-part').html(momentNow.format('HH:mm:ss'));
+    }, 100);
+});
+</script>
+
+<script>
+    $(function () {
+      $('#absensiharian').DataTable({
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": false,
+        "autoWidth": true,
+        "responsive": false,
+      });
+    });
+  </script>
+
+</body>
+</html>
