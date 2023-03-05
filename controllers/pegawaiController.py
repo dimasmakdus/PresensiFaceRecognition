@@ -361,10 +361,11 @@ def absensi2_recognition():  # generate frame by frame from camera
             id, pred = clf.predict(gray_image[y:y + h, x:x + w])
             confidence = int(100 * (1 - pred / 300))
 
-            mycursor.execute("select b.pegawai_id, b.pegawai_name "
-                             "  from img_dataset a "
-                             "  left join pegawai b on a.img_person = b.pegawai_id "
-                             " where img_id = " + str(id))
+            mycursor.execute("select a.img_person, b.pegawai_name, c.jabatan_name "
+                                 "  from img_dataset a "
+                                 "  left join pegawai b on a.img_person = b.pegawai_id "
+                                 "  left join jabatan c on b.pegawai_jabatan_id = c.jabatan_id"
+                                 " where img_id = " + str(id))
             dt = mycursor.fetchone()
 
             # if confidence >= 85 and confidence <= 90 and (s is not None):
@@ -373,6 +374,9 @@ def absensi2_recognition():  # generate frame by frame from camera
 
                 id = '' + ''.join(dt[0])
                 s = '' + ''.join(dt[1])
+
+                pname = dt[1]
+                pskill = dt[2]
                 # print(s)
 
                 datapegawai.append(id)
@@ -390,7 +394,7 @@ def absensi2_recognition():  # generate frame by frame from camera
                     datacheck = 0
                     datapegawai.clear()
 
-                cv2.putText(img, s, (x, y - 5),
+                cv2.putText(img, pname + ' | ' + pskill, (x, y - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
             else:
                 cv2.putText(img, "TIDAK DIKENALI", (x, y - 5),
@@ -638,9 +642,10 @@ def loadData():
     return jsonify(response=response)
 
 def loadAbsensi2():
-    mycursor.execute("select a.pegawai_id, a.pegawai_name, a.jabatan_name, date_format(a.accs_added, '%H:%i:%s') "
-                     "  from view_absensi a "
-                     " order by 1 desc")
+    mycursor.execute("select a.pegawai_id, a.pegawai_name, a.jabatan_name, DATE_FORMAT(a.accs_date, '%d-%m-%Y'), TIME_FORMAT(a.accs_added, '%H:%i:%s') as accs_added, accs_type, (select img_dataset.img_id from img_dataset where img_dataset.img_person = a.pegawai_id limit 1) "
+                     " from view_absensi a "
+                     " where accs_date = '" + str(date.today()) + "' "
+                     " order by accs_added desc")
     data = mycursor.fetchall()
  
     return jsonify(response = data)
@@ -649,12 +654,117 @@ def submitAbsensi2():
     global datapegawai
     result = [*set(datapegawai)]
 
-    for id in result:
+    for pnbr in result:
+        # mycursor.execute(
+        #     "insert into access_history (accs_date, accs_prsn) values('"+str(date.today())+"', '" + pnbr + "')")
+        # mydb.commit()
+        currentDateAndTime = datetime.now()
+        currentTime = currentDateAndTime.strftime("%H:%M:%S")
+
+        # Get Jam Masuk
         mycursor.execute(
-            "insert into access_history (accs_date, accs_prsn) values('"+str(date.today())+"', '" + id + "')")
-        mydb.commit()
+            "select * from jamkerja where jamkerja_id = 1")
+        jam_masuk = mycursor.fetchone()
+
+        # Get Jam Masuk
+        mycursor.execute(
+            "select * from jamkerja where jamkerja_id = 2")
+        jam_pulang = mycursor.fetchone()
+
+        # Check Absen Pagi
+        mycursor.execute(
+            "select accs_date from access_history where accs_prsn = '" + str(pnbr) + "' and accs_date = '" + str(date.today()) + "' and accs_added between '"+str(jam_masuk[2])+"' and '"+str(jam_masuk[3])+"'")
+        absen_masuk = mycursor.fetchone()
+        check_absen_masuk = absen_masuk if absen_masuk else []
+
+        # Check Absen Sore
+        mycursor.execute(
+            "select accs_date from access_history where accs_prsn = '" + str(pnbr) + "' and accs_date = '" + str(date.today()) + "' and accs_added between '"+str(jam_pulang[2])+"' and '"+str(jam_pulang[3])+"'")
+        absen_pulang = mycursor.fetchone()
+        check_absen_pulang = absen_pulang if absen_pulang else []
+
+        # Check Absen Hari Ini
+        mycursor.execute(
+            "select accs_date from access_history where accs_prsn = '" + str(pnbr) + "' and accs_date = '" + str(date.today()) + "'")
+        absen_harini = mycursor.fetchone()
+        check_absen_harini = absen_harini if absen_harini else []
+
+        if datetime.strptime(str(currentTime), "%H:%M:%S") >= datetime.strptime(str(jam_masuk[2]), "%H:%M:%S") and datetime.strptime(str(currentTime), "%H:%M:%S") <= datetime.strptime(str(jam_masuk[3]), "%H:%M:%S"):
+
+            if len(check_absen_masuk) > 0:
+                print("SUDAH ABSEN PAGI HARI INI")
+
+                presensi_pegawai_id = pnbr
+                presensi_msg = "Sudah Absen Pagi Hari Ini"
+                presensi_status = 1
+            else:
+                mycursor.execute(
+                    "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+str(jam_masuk[0])+"')")
+                mydb.commit()
+                print("BELUM ABSEN PAGI HARI INI")
+
+                presensi_pegawai_id = pnbr
+                presensi_msg = "Berhasil Absen Pagi Hari Ini"
+                presensi_status = 2
+
+        elif datetime.strptime(str(currentTime), "%H:%M:%S") >= datetime.strptime(str(jam_pulang[2]), "%H:%M:%S") and datetime.strptime(str(currentTime), "%H:%M:%S") <= datetime.strptime(str(jam_pulang[3]), "%H:%M:%S"):
+
+            if len(check_absen_pulang) > 0:
+                print("SUDAH ABSEN SORE HARI INI")
+
+                presensi_pegawai_id = pnbr
+                presensi_msg = "Sudah Absen Sore Hari Ini"
+                presensi_status = 1
+            else:
+                mycursor.execute(
+                    "insert into access_history (accs_date, accs_prsn, accs_type) values('"+str(date.today())+"', '" + pnbr + "', '"+str(jam_pulang[0])+"')")
+                mydb.commit()
+                print("BELUM ABSEN SORE HARI INI")
+
+                presensi_pegawai_id = pnbr
+                presensi_msg = "Berhasil Absen Sore Hari Ini"
+                presensi_status = 2
+        else:
+            print("BELUM WAKTUNYA ABSEN")
+            presensi_pegawai_id = pnbr
+            presensi_msg = "BELUM WAKTUNYA ABSEN"
+            presensi_status = 1
  
-    return jsonify(response = 'Absensi Berhasil Tersimpan')
+    response = []
+    if (presensi_status != 0):
+        mycursor.execute(
+            "SELECT pegawai_name, jabatan_name FROM view_pegawai WHERE pegawai_id = "+str(presensi_pegawai_id)+" limit 1")
+        data = mycursor.fetchone()
+
+        mycursor.execute(
+            "SELECT img_id, img_person FROM img_dataset WHERE img_person = "+str(presensi_pegawai_id)+" limit 1")
+        img_dataset = mycursor.fetchone()
+
+        response = {
+            'status': presensi_status,
+            'msg': presensi_msg,
+            'data': {
+                'pegawai_id': presensi_pegawai_id,
+                'pegawai_name': data[0],
+                'jabatan_name': data[1],
+                'img_id': img_dataset[0]
+            }
+        }
+    else:
+        response = {
+            'status': presensi_status,
+            'msg': presensi_msg,
+            'data': {
+                'pegawai_name': '',
+                'jabatan_name': '',
+                'img_id': ''
+            }
+        }
+
+    presensi_pegawai_id = 0
+    presensi_msg = ""
+    presensi_status = 0
+    return jsonify(response = response)
 
 def clearAbsensi2():
     mycursor.execute("delete from access_history")

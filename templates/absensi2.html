@@ -48,10 +48,13 @@
                         <table class="table" >
                             <thead>
                                 <tr>
+                                    <th>Foto</th>
                                     <th>ID Pegawai #</th>
                                     <th>Nama</th>
                                     <th>Jabatan</th>
-                                    <th>Tanggal & Waktu</th>
+                                    <th>Tanggal</th>
+                                    <th>Waktu</th>
+                                    <th>Jadwal</th>
                                 </tr>
                             </thead>
                             <tbody id="scandata">
@@ -76,16 +79,21 @@
             dataType: 'json',
             success: function(res){
                 var data = res.response
+                console.log(data)
                 var tr = $("#scandata");
                 tr.empty();
 
                 if (data.length > 0) {
                     for (let i = 0; i < data.length; i++) {
+                        var jadwal = data[i][5] == 1 ? '<span class="badge bg-warning px-3" style="font-size: 15px">Masuk</span>' : '<span class="badge bg-info px-3" style="font-size: 15px">Pulang</span>';
                         tr.append('<tr>'+
-                                        '<td>'+data[i][0]+'</td>'+
-                                        '<td>'+data[i][1]+'</td>'+
-                                        '<td>'+data[i][2]+'</td>'+
-                                        '<td>'+data[i][3]+'</td>'+
+                                        '<td width="20%"><img src="/getDatasetImg/'+data[i][0]+'.'+data[i][6]+'.jpg" width="30%" ></td>'+
+                                        '<td class="py-3">'+data[i][0]+'</td>'+
+                                        '<td class="py-3">'+data[i][1]+'</td>'+
+                                        '<td class="py-3">'+data[i][2]+'</td>'+
+                                        '<td class="py-3">'+data[i][3]+'</td>'+
+                                        '<td class="py-3">'+data[i][4]+'</td>'+
+                                        '<td class="py-3">'+jadwal+'</td>'+
                                     '</tr>');
                     }
                 }
@@ -102,7 +110,20 @@
             type: 'POST',
             dataType: 'json',
             success: function(res){
-                reloadTable()
+                const response = res.response
+                const data = response.data
+                const msg = response.msg
+                const status = response.status
+
+                if(status == 2) {
+                    reloadTable()
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: msg,
+                        text: data.pegawai_name+' - '+data.jabatan_name,
+                    })
+                }
             },
             error: function(result){
                 console.log('no result!')
